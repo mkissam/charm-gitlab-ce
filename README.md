@@ -1,28 +1,152 @@
 # Gitlab Community Edition Operator
 
-A juju charm deploying and managing Gitlab Community Edition on
-Kubernetes.
+A juju operator charm for a Kubernetes deployment and operatin of GitLab
+Community Edition.
 
 ## Description
 
-TODO: Describe your charm in a few paragraphs of Markdown
+GitLab is the de-facto open-source standard for a hosted Git repository manager,
+wiki, issue-tracking and continous integration and deployment pipeline featrues.
+This operator charm is using the offical GitLab docker image (gitlab/gitlab-ce)
+as a source for deployment.
 
-## Usage
+The default configuration used for this charm is providing the following
+internal gitlab services based on the all-in-one gitlab-ce image:
+- gitaly
+- gitlab-exporter
+- gitlab-workhorse
+- logrotate
+- nginx
+- postgres-exporter
+- postgresql
+- puma
+- redis
+- redis-exporter
+- sideiq
+- sshd
 
-TODO: Provide high-level usage, such as required config or relations
 
+## Quickstart
 
-## Developing
+Assuming you have a juju installed and bootstrapped on a Kubernetes cluster,
+deploy the charm and relate it to an ingress controller (if you do not, see the
+next section):
 
-Create and activate a virtualenv with the development requirements:
+```bash
+# Deploy the GitLab CE charm
+$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \        
+    --resource gitlab-image=gitlab/gitlab-ce \
+    --config external_url="gitlab-ce-demo.juju"
 
-    virtualenv -p python3 venv
-    source venv/bin/activate
-    pip install -r requirements-dev.txt
+# Deploy the ingress integrator charm
+$ juju deploy nginx-ingress-integrator ingress \
+    --config ingress-class="public"
 
-## Testing
+# Relate gitlab-ce and ingress integrator
+$ juju relate gitlab-ce:ingress ingress:ingress
 
-The Python operator framework includes a very nice harness for testing
-operator behaviour without full deployment. Just `run_tests`:
+# Add an entry to /etc/hosts
+$ echo "127.0.1.1 gitlab-ce-demo.juju" | sudo tee -a /etc/hosts
 
-    ./run_tests
+# Wait for the deployment to complete
+$ watch -n1 --color juju status --color
+```
+
+Open the http://gitlab-ce-demo.juju url in your browser, and register a new
+administrator password. You can login now with 'admin' using the new password.
+
+## Development Setup
+
+To set up a local test environment with [MicroK8s](https://microk8s.io):
+
+```bash
+# Install MicroK8s
+$ sudo snap install --classic microk8s
+
+# Wait for MicroK8s to be ready
+$ sudo microk8s status --wait-ready
+
+# Enable features required by Juju controller & charm
+$ sudo microk8s enable storage dns ingress
+
+# (Optional) Alias kubectl bundled with MicroK8s package
+$ sudo snap alias microk8s.kubectl kubectl
+
+# (Optional) Add current user to 'microk8s' group
+# This avoid needing to use 'sudo' with the 'microk8s' command
+$ sudo usermod -aG microk8s $(whoami)
+
+# Activate the new group (in the current shell only)
+# Log out and log back in to make the change system-wide
+$ newgrp microk8s
+
+# Install Charmcraft
+$ sudo snap install charmcraft
+
+# Install juju
+$ sudo snap install --classic juju
+
+# Bootstrap the Juju controller on MicroK8s
+$ juju bootstrap microk8s micro
+
+# Add a new model to Juju
+$ juju add-model development
+```
+
+## Build and Deploy Locally
+
+```bash
+# Clone the charm code
+$ git clone https://github.com/mkissam/charm-gitlab-ce-operator && cd charm-gitlab-ce-operator
+
+# Build the charm package
+$ charmcraft pack
+
+# Deploy!
+$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \        
+    --resource gitlab-image=gitlab/gitlab-ce \
+    --config external_url="gitlab-ce-demo.juju"
+
+# Deploy the ingress integrator
+$ juju deploy nginx-ingress-integrator ingress \
+    --config ingress-class="public"
+
+# Relate our app to the ingress
+$ juju relate gitlab-ce:ingress ingress:ingress
+
+# Add an entry to /etc/hosts
+$ echo "127.0.1.1 gitlab-ce-demo.juju" | sudo tee -a /etc/hosts
+
+# Wait for the deployment to complete
+$ watch -n1 --color juju status --color
+```
+
+## Running tests
+
+```bash
+# Clone the charm code
+$ git clone https://github.com/mkissam/charm-gitlab-ce-operator && cd charm-gitlab-ce-operator
+
+# Install python3-virtualenv
+$ sudo apt update && sudo apt install -y python3-virtualenv
+
+# Create a virtualenv for the charm code
+$ virtualenv venv
+
+# Activate the venv
+$ source ./venv/bin/activate
+
+# Install dependencies
+$ pip install -r requirements-dev.txt
+
+# Run the tests
+$ ./run_tests
+```
+
+## TODO/Roadmap
+
+- [ ] Add charm unit tests
+- [ ] Allow external postgresql relation
+- [ ] Implement external redis support
+- [ ] Add configuration options for e-mail sending
+- [ ] Build a gitlab-runner charm and relation

@@ -1,0 +1,39 @@
+# Copyright 2021 Ubuntu
+# See LICENSE file for licensing details.
+name: gitlab-ce-operator
+description: |
+  Charm description goes here. 
+summary: |
+  Charm summary.
+
+requires:
+  ingress:
+    interface: ingress
+
+containers:
+  gitlab:
+    resource: gitlab-image
+    mounts:
+      - storage: gitlab-etc
+        location: /etc/gitlab
+      - storage: gitlab-var-opt
+        location: /var/opt/gitlab
+      - storage: gitlab-var-log
+        location: /var/log/gitlab
+
+resources:
+  gitlab-image:
+    type: oci-image
+    description: OCI image for GitLab Community Edition (gitlab/gitlab-ce)
+
+storage:
+  gitlab-etc:
+    type: filesystem
+    location: /srv/gitlab/etc
+  gitlab-var-opt:
+    type: filesystem
+    location: /srv/gitlab/var/opt 
+  gitlab-var-log:
+    type: filesystem
+    location: /srv/gitlab/var/log
+

@@ -34,7 +34,7 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \
+$ juju deploy gitlab-ce-operator --channel beta gitlab-ce \
     --resource gitlab-image=gitlab/gitlab-ce \
     --config external_url="gitlab-ce-demo.juju"
 

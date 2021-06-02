@@ -6,8 +6,8 @@ Community Edition.
 ## Description
 
 GitLab is the de-facto open-source standard for a hosted Git repository manager,
-wiki, issue-tracking and continous integration and deployment pipeline featrues.
-This operator charm is using the offical GitLab docker image (gitlab/gitlab-ce)
+wiki, issue-tracking and continuous integration and deployment pipeline features.
+This operator charm is using the official GitLab docker image (gitlab/gitlab-ce)
 as a source for deployment.
 
 The default configuration used for this charm is providing the following

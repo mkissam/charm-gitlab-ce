@@ -42,6 +42,9 @@ $ echo "127.0.1.1 gitlab-ce-demo.juju" | sudo tee -a /etc/hosts
 $ watch -n1 --color juju status --color
 ```
 
+The initial gitlab preparation takes around 3-4 minutes, before the web ui
+is properly showing up and everything is settled.
+
 Open the http://gitlab-ce-demo.juju url in your browser, and register a new
 administrator password. You can login now as 'root' using the new password.
 

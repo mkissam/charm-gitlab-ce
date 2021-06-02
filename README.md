@@ -11,7 +11,7 @@ This operator charm is using the official GitLab docker image (gitlab/gitlab-ce)
 as a source for deployment.
 
 The default configuration used for this charm is providing the 
-internal gitlab services includes in the all-in-one gitlab-ce image:
+internal gitlab services included in the all-in-one gitlab-ce image.
 
 ## Quickstart
 
@@ -21,8 +21,7 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy gitlab-ce-operator --channel beta gitlab-ce \
-    --resource gitlab-image=gitlab/gitlab-ce \
+$ juju deploy gitlab-ce-operator \
     --config external_url="gitlab-ce-demo.juju"
 
 # Deploy the ingress integrator charm
@@ -132,9 +131,4 @@ $ ./run_tests
 
 ## TODO/Roadmap
 
-- [ ] Add charm unit tests
-- [ ] Allow external postgresql relation
-- [ ] Implement external redis support
-- [ ] Add configuration options for e-mail sending
-- [ ] Build a gitlab-runner charm and relation
-- [ ] Provide SSH access in ingress
+See docs/04-future-plans.md for details.

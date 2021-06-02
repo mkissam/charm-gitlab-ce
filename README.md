@@ -1,6 +1,6 @@
 # Gitlab Community Edition Operator
 
-A juju operator charm for a Kubernetes deployment and operatin of GitLab
+A juju operator charm for a Kubernetes deployment and operation of GitLab
 Community Edition.
 
 ## Description
@@ -34,7 +34,7 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \        
+$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \
     --resource gitlab-image=gitlab/gitlab-ce \
     --config external_url="gitlab-ce-demo.juju"
 
@@ -53,7 +53,7 @@ $ watch -n1 --color juju status --color
 ```
 
 Open the http://gitlab-ce-demo.juju url in your browser, and register a new
-administrator password. You can login now with 'admin' using the new password.
+administrator password. You can login now as 'root' using the new password.
 
 ## Development Setup
 
@@ -150,3 +150,4 @@ $ ./run_tests
 - [ ] Implement external redis support
 - [ ] Add configuration options for e-mail sending
 - [ ] Build a gitlab-runner charm and relation
+- [ ] Provide SSH access in ingress

@@ -1,17 +1,19 @@
 # Copyright 2021 Ubuntu
 # See LICENSE file for licensing details.
 name: gitlab-ce-operator
+display-name: GitLab CE Operator
 description: |
   GitLab is the de-facto open-source standard for a hosted Git repository manager, wiki,
   issue-tracking and continuous integration and deployment pipeline features.
   This operator charm is using the official GitLab docker image (gitlab/gitlab-ce)
   as a source for deployment.
-
   The default configuration used for this charm is providing internal 
   gitlab services based on the all-in-one gitlab-ce image.
 summary: |
   A juju operator charm for a Kubernetes deployment and operation of GitLab Community
-  Edition. 
+  Edition.
+maintainers:
+  - https://launchpad.net/~marton-kiss 
 docs: https://discourse.charmhub.io/t/gitlab-ce-operator-docs-index/4662
 
 requires:

@@ -3,8 +3,8 @@
 A juju operator charm for a Kubernetes deployment and operation of GitLab
 Community Edition.
 
-Charmhub page: https://charmhub.io/gitlab-ce-operator
-Documentation: https://charmhub.io/gitlab-ce-operator/docs
+Charmhub page: https://charmhub.io/gitlab-ce-operator  
+Documentation: https://charmhub.io/gitlab-ce-operator/docs  
 Bugs / Issues: https://github.com/mkissam/charm-gitlab-ce-operator/issues
 
 ## Description

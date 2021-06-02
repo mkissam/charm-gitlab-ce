@@ -96,7 +96,32 @@ class GitlabCEOperatorCharm(CharmBase):
                 return
             cfg_terms += ['{}={}'.format(k, self.format_config_value(v))]
 
-        # TODO: add further gitlab config options here
+        append_config(cfg_terms, 'gitlab_rails[\'gitlab_ssh_host\']',
+                      cfg.get('ssh_host')),
+        append_config(cfg_terms, 'gitlab_rails[\'time_zone\']',
+                      cfg.get('time_zone')),
+        append_config(cfg_terms, 'gitlab_rails[\'gitlab_email_from\']',
+                      cfg.get('email_from')),
+        append_config(cfg_terms, 'gitlab_rails[\'gitlab_email_display_name\']',
+                      cfg.get('from_email_name')),
+        append_config(cfg_terms, 'gitlab_rails[\'gitlab_email_reply_to\']',
+                      cfg.get('reply_to_email')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_enable\']',
+                      cfg.get('smtp_enable')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_address\']',
+                      cfg.get('smtp_address')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_port\']',
+                      cfg.get('smtp_port')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_user_name\']',
+                      cfg.get('smtp_user_name')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_password\']',
+                      cfg.get('smtp_password')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_domain\']',
+                      cfg.get('smtp_domain')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_enable_starttls_auto\']',
+                      cfg.get('smtp_enable_starttls_auto')),
+        append_config(cfg_terms, 'gitlab_rails[\'smtp_tls\']',
+                      cfg.get('smtp_tls')),
 
         return '; '.join(map(str, cfg_terms))
 

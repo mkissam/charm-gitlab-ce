@@ -25,7 +25,7 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy gitlab-ce-operator \
+$ juju deploy gitlab-ce-operator gitlab-ce \
     --config external_url="gitlab-ce-demo.juju"
 
 # Deploy the ingress integrator charm
@@ -93,7 +93,7 @@ $ git clone https://github.com/mkissam/charm-gitlab-ce-operator && cd charm-gitl
 $ charmcraft pack
 
 # Deploy!
-$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \        
+$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \
     --resource gitlab-image=gitlab/gitlab-ce \
     --config external_url="gitlab-ce-demo.juju"
 

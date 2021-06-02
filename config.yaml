@@ -1,13 +1,18 @@
 # Copyright 2021 Ubuntu
 # See LICENSE file for licensing details.
 #
+# TEMPLATE-TODO: change this example to suit your needs.
+# If you don't need a config, you can remove the file entirely.
+# It ties in to the example _on_config_changed handler in src/charm.py
+#
+# Learn more about config at: https://juju.is/docs/sdk/config
 
 options:
-  "external_url":
+  external_url:
     "type": "string"
     "description": "The FQDN for your GitLab unit"
     "default": !!null ""
-  "http_port":
+  http_port:
     "type": "string"
     "description": "The HTTP port"
     "default": "80"
@@ -15,3 +20,51 @@ options:
     type: string
     description: "The Kubernetes TLS secret resource name."
     default: ""
+  ssh_host:
+    "type": "string"
+    "description": "Override the SSH Hostname"
+    "default": !!null ""
+  email_from:
+    "type": "string"
+    "description": "Email address used in the from field in mails send by GitLab"
+    "default": !!null ""
+  from_email_name:
+    "type": "string"
+    "description": "The Name Used in the From field"
+    "default": !!null ""
+  reply_to_email:
+    "type": "string"
+    "description": "Override the reply to email address"
+    "default": !!null ""
+  smtp_enable:
+    "type": "boolean"
+    "description": "Enable SMTP sending"
+    "default": !!bool "true"
+  smtp_address:
+    "type": "string"
+    "description": "SMTP Address"
+    "default": !!null ""
+  smtp_port:
+    "type": "string"
+    "description": "SMTP Port"
+    "default": !!null ""
+  smtp_user_name:
+    "type": "string"
+    "description": "SMTP Username"
+    "default": !!null ""
+  smtp_password:
+    "type": "string"
+    "description": "SMTP Password"
+    "default": !!null ""
+  smtp_domain:
+    "type": "string"
+    "description": "SMTP Domain"
+    "default": !!null ""
+  smtp_enable_starttls_auto:
+    "type": "boolean"
+    "description": "Enable STARTTLS automatically"
+    "default": !!bool "true"
+  smtp_tls:
+    "type": "boolean"
+    "description": "SMTP TLS"
+    "default": !!bool "false"

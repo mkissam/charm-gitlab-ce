@@ -3,6 +3,10 @@
 A juju operator charm for a Kubernetes deployment and operation of GitLab
 Community Edition.
 
+Charmhub page: https://charmhub.io/gitlab-ce-operator
+Documentation: https://charmhub.io/gitlab-ce-operator/docs
+Bugs / Issues: https://github.com/mkissam/charm-gitlab-ce-operator/issues
+
 ## Description
 
 GitLab is the de-facto open-source standard for a hosted Git repository manager,

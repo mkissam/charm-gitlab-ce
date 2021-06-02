@@ -10,21 +10,8 @@ wiki, issue-tracking and continuous integration and deployment pipeline features
 This operator charm is using the official GitLab docker image (gitlab/gitlab-ce)
 as a source for deployment.
 
-The default configuration used for this charm is providing the following
-internal gitlab services based on the all-in-one gitlab-ce image:
-- gitaly
-- gitlab-exporter
-- gitlab-workhorse
-- logrotate
-- nginx
-- postgres-exporter
-- postgresql
-- puma
-- redis
-- redis-exporter
-- sideiq
-- sshd
-
+The default configuration used for this charm is providing the 
+internal gitlab services includes in the all-in-one gitlab-ce image:
 
 ## Quickstart
 

@@ -3,9 +3,9 @@
 A juju operator charm for a Kubernetes deployment and operation of GitLab
 Community Edition.
 
-Charmhub page: https://charmhub.io/gitlab-ce-operator  
-Documentation: https://charmhub.io/gitlab-ce-operator/docs  
-Bugs / Issues: https://github.com/mkissam/charm-gitlab-ce-operator/issues
+Charmhub page: https://charmhub.io/gitlab-ce  
+Documentation: https://charmhub.io/gitlab-ce/docs  
+Bugs / Issues: https://github.com/mkissam/charm-gitlab-ce/issues
 
 ## Description
 
@@ -25,8 +25,8 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy gitlab-ce-operator gitlab-ce \
-    --config external_url="gitlab-ce-demo.juju"
+$ juju deploy gitlab-ce \
+  --config external_url="gitlab-ce-demo.juju"
 
 # Deploy the ingress integrator charm
 $ juju deploy nginx-ingress-integrator ingress \
@@ -90,13 +90,13 @@ $ juju add-model development
 
 ```bash
 # Clone the charm code
-$ git clone https://github.com/mkissam/charm-gitlab-ce-operator && cd charm-gitlab-ce-operator
+$ git clone https://github.com/mkissam/charm-gitlab-ce && cd charm-gitlab-ce
 
 # Build the charm package
 $ charmcraft pack
 
 # Deploy!
-$ juju deploy ./gitlab-ce-operator.charm gitlab-ce \
+$ juju deploy ./gitlab-ce.charm \
     --resource gitlab-image=gitlab/gitlab-ce \
     --config external_url="gitlab-ce-demo.juju"
 
@@ -118,7 +118,7 @@ $ watch -n1 --color juju status --color
 
 ```bash
 # Clone the charm code
-$ git clone https://github.com/mkissam/charm-gitlab-ce-operator && cd charm-gitlab-ce-operator
+$ git clone https://github.com/mkissam/charm-gitlab-ce && cd charm-gitlab-ce
 
 # Install python3-virtualenv
 $ sudo apt update && sudo apt install -y python3-virtualenv

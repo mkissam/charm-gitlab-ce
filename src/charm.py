@@ -25,7 +25,7 @@ from charms.nginx_ingress_integrator.v0.ingress import IngressRequires
 logger = logging.getLogger(__name__)
 
 
-class GitlabCEOperatorCharm(CharmBase):
+class GitlabCECharm(CharmBase):
     """Charm the service."""
 
     def __init__(self, *args):
@@ -176,4 +176,4 @@ class GitlabCEOperatorCharm(CharmBase):
 
 
 if __name__ == "__main__":
-    main(GitlabCEOperatorCharm)
+    main(GitlabCECharm)

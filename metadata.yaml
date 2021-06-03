@@ -1,6 +1,6 @@
 # Copyright 2021 Ubuntu
 # See LICENSE file for licensing details.
-name: gitlab-ce-operator
+name: gitlab-ce
 display-name: GitLab CE Operator
 summary: GitLab CE juju operator charm for Kubernetes
 description: |

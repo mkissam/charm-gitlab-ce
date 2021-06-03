@@ -25,18 +25,16 @@ next section):
 
 ```bash
 # Deploy the GitLab CE charm
-$ juju deploy gitlab-ce \
-  --config external_url="gitlab-ce-demo.juju"
+$ juju deploy gitlab-ce
 
 # Deploy the ingress integrator charm
-$ juju deploy nginx-ingress-integrator ingress \
-    --config ingress-class="public"
+$ juju deploy nginx-ingress-integrator ingress
 
 # Relate gitlab-ce and ingress integrator
 $ juju relate gitlab-ce:ingress ingress:ingress
 
 # Add an entry to /etc/hosts
-$ echo "127.0.1.1 gitlab-ce-demo.juju" | sudo tee -a /etc/hosts
+$ echo "127.0.1.1 gitlab-ce" | sudo tee -a /etc/hosts
 
 # Wait for the deployment to complete
 $ watch -n1 --color juju status --color
@@ -45,7 +43,7 @@ $ watch -n1 --color juju status --color
 The initial gitlab preparation takes around 3-4 minutes, before the web ui
 is properly showing up and everything is settled.
 
-Open the http://gitlab-ce-demo.juju url in your browser, and register a new
+Open the `http://gitlab-ce` URL in your browser, and register a new
 administrator password. You can login now as 'root' using the new password.
 
 ## Development Setup
@@ -98,17 +96,15 @@ $ charmcraft pack
 # Deploy!
 $ juju deploy ./gitlab-ce.charm \
     --resource gitlab-image=gitlab/gitlab-ce \
-    --config external_url="gitlab-ce-demo.juju"
 
 # Deploy the ingress integrator
 $ juju deploy nginx-ingress-integrator ingress \
-    --config ingress-class="public"
 
 # Relate our app to the ingress
 $ juju relate gitlab-ce:ingress ingress:ingress
 
 # Add an entry to /etc/hosts
-$ echo "127.0.1.1 gitlab-ce-demo.juju" | sudo tee -a /etc/hosts
+$ echo "127.0.1.1 gitlab-ce" | sudo tee -a /etc/hosts
 
 # Wait for the deployment to complete
 $ watch -n1 --color juju status --color

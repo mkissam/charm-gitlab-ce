@@ -38,7 +38,7 @@ creation. The password should be a random password, and retrieved by the
 get-initial-password action.
 
 ```
-juju run gitlab-ce-operator --wait get-initial-password
+juju run gitlab-ce --wait get-initial-password
 ```
 
 ## Implement external redis support

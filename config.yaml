@@ -3,13 +3,13 @@
 
 options:
   external_url:
-    "type": "string"
-    "description": "The FQDN for your GitLab unit"
-    "default": !!null ""
+    type: string
+    description: "The FQDN for your GitLab unit. If unset, the name of the deployed application will be used."
+    default: ""
   http_port:
-    "type": "string"
-    "description": "The HTTP port"
-    "default": "80"
+    type: int
+    description: "The HTTP port"
+    default: 80
   tls_secret_name:
     type: string
     description: "The Kubernetes TLS secret resource name."

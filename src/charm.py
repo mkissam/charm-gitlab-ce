@@ -21,6 +21,7 @@ from ops.model import ActiveStatus
 from ops.pebble import ConnectionError
 
 from charms.nginx_ingress_integrator.v0.ingress import IngressRequires
+from charms.observability_libs.v0 import kubernetes_service_patch as k8s_svc_patch
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,15 @@ class GitlabCECharm(CharmBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
+
+        # Patch the Kubernetes Service created for this charm to point to the
+        # right port.
+        self.service_patcher = k8s_svc_patch.KubernetesServicePatch(
+            self,
+            [
+                (f"{self.app.name}", 80, self.model.config["http_port"]),
+            ],
+        )
 
         self.ingress = IngressRequires(self, self.ingress_config)
 

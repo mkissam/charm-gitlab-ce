@@ -4,13 +4,16 @@
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
 import unittest
+from unittest import mock
 
 from charm import GitlabCECharm
 from ops.testing import Harness
 
 
 class TestCharm(unittest.TestCase):
-    def setUp(self):
+
+    @mock.patch("charm.k8s_svc_patch.KubernetesServicePatch", lambda x, y: None)
+    def setUp(self, *unused):
         self.harness = Harness(GitlabCECharm)
         self.addCleanup(self.harness.cleanup)
         self.harness.begin()

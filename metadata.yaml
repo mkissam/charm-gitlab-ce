@@ -18,6 +18,11 @@ requires:
   ingress:
     interface: ingress
 
+provides:
+  gitlab:
+    interface: gitlab
+    scope: global
+
 containers:
   gitlab:
     resource: gitlab-image

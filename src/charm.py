@@ -12,30 +12,58 @@ develop a new k8s charm using the Operator Framework:
     https://discourse.charmhub.io/t/4208
 """
 
+import json
 import logging
 import os
+import uuid
 
 from ops.charm import CharmBase
-from ops.framework import StoredState
 from ops.main import main
 from ops.model import ActiveStatus
+from ops.pebble import ConnectionError
 
 from charms.nginx_ingress_integrator.v0.ingress import IngressRequires
+from charms.observability_libs.v0 import kubernetes_service_patch as k8s_svc_patch
 
 logger = logging.getLogger(__name__)
+
+GITLAB_RELATION_NAME = "gitlab"
+# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token-programmatically
+RAILS_CREATE_TOKEN = (
+    "token = User.find_by_username('%(username)s').personal_access_tokens"
+    ".create(scopes: [:api], name: '%(token_name)s'); "
+    "token.set_token('%(token)s'); token.save!"
+)
+RAILS_DELETE_TOKEN = (
+    "PersonalAccessToken.find_by_token('%(token)s').revoke!"
+)
+SCHEME_HTTP = "http"
+SCHEME_HTTPS = "https"
 
 
 class GitlabCECharm(CharmBase):
     """Charm the service."""
 
-    _stored = StoredState()
-
     def __init__(self, *args):
         super().__init__(*args)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
-        self._stored.set_default(things=[])
+
+        # Patch the Kubernetes Service created for this charm to point to the
+        # right port.
+        self.service_patcher = k8s_svc_patch.KubernetesServicePatch(
+            self,
+            [
+                (f"{self.app.name}", 80, self.model.config["http_port"]),
+            ],
+        )
 
         self.ingress = IngressRequires(self, self.ingress_config)
+
+        # gitlab relation lifecycle events:
+        self.framework.observe(self.on[GITLAB_RELATION_NAME].relation_joined,
+                               self._on_gitlab_relation_joined)
+        self.framework.observe(self.on[GITLAB_RELATION_NAME].relation_broken,
+                               self._on_gitlab_relation_broken)
 
     def charm_dir(self):
         """Return the root directory of the current charm"""
@@ -71,21 +99,17 @@ class GitlabCECharm(CharmBase):
         cfg_terms = []
 
         # build external url
-        exturl = None
-        if cfg.get('external_url'):
-            exturl = cfg.get('external_url')
-            if exturl != '' and not exturl.startswith("http"):
-                exturl = "http://" + exturl
+        exturl = self._external_url
+        if exturl != '' and not exturl.startswith("http"):
+            exturl = "http://" + exturl
 
         http_port = cfg.get('http_port')
-        if exturl is not None and http_port is not None:
-            if exturl.endswith("/"):
-                exturl = exturl[:-1]
+        if exturl.endswith("/"):
+            exturl = exturl[:-1]
 
-            exturl = exturl + ":{}".format(http_port)
+        exturl = exturl + ":{}".format(http_port)
 
-        if exturl is not None:
-            cfg_terms = ['external_url {}'.format(self.format_config_value(exturl))]
+        cfg_terms = ['external_url {}'.format(self.format_config_value(exturl))]
 
         # disable internal monitoring and alerting services
         cfg_terms += ['alertmanager[\'enable\']=false']
@@ -125,18 +149,25 @@ class GitlabCECharm(CharmBase):
 
         return '; '.join(map(str, cfg_terms))
 
-    def _on_config_changed(self, _):
+    def _on_config_changed(self, event):
         container = self.unit.get_container("gitlab")
         layer = self._gitlab_layer()
-        services = container.get_plan().to_dict().get("services", {})
+        try:
+            services = container.get_plan().to_dict().get("services", {})
+        except ConnectionError:
+            logger.info("Unable to connect to Pebble, deferring event")
+            event.defer()
+            return
+        # Update our ingress definition if appropriate.
+        self.ingress.update_config(self.ingress_config)
         if services != layer["services"]:
             container.add_layer("gitlab", layer, combine=True)
             logger.info("Added updated layer to gitlab")
             if container.get_service("gitlab").is_running():
                 container.stop("gitlab")
             # Custom /assets/wrapper for Gitlab initial configuration
-            file = open(os.path.join(self.charm_dir(), 'templates/gitlab-install'), 'r')
-            container.push("/assets/gitlab-install", file, make_dirs=True, permissions=0o755)
+            with open(os.path.join(self.charm_dir(), 'templates/gitlab-install'), 'r') as file:
+                container.push("/assets/gitlab-install", file, make_dirs=True, permissions=0o755)
             container.start("gitlab")
             logger.info("Restarted gitlab service")
         self.unit.status = ActiveStatus()
@@ -159,24 +190,84 @@ class GitlabCECharm(CharmBase):
         }
 
     @property
-    def ingress_config(self):
-        cfg = self.model.config
-        ext_url = cfg.get('external_url')
-        http_port = cfg.get('http_port')
-        if not ext_url:
-            ext_url = 'gitlab-ce.juju'
-        if not http_port:
-            http_port = 80
+    def _external_url(self):
+        return self.config.get("external_url") or self.app.name
 
+    @property
+    def ingress_config(self):
         ingress_config = {
-            "service-hostname": ext_url,
+            "service-hostname": self._external_url,
             "service-name": self.app.name,
-            "service-port": http_port,
+            "service-port": self.config["http_port"],
         }
-        tls_secret_name = self.model.config["tls_secret_name"]
+        tls_secret_name = self.config["tls_secret_name"]
         if tls_secret_name:
             ingress_config["tls-secret-name"] = tls_secret_name
         return ingress_config
+
+    def _on_gitlab_relation_joined(self, event):
+        """Handles the gitlab relation joined event.
+
+        When a charm is joining this charm, we can generate a token for it
+        and set connection details into the relation data.
+        """
+        if not self.unit.is_leader():
+            # If we're not the leader, we won't be able to set the
+            # relation data.
+            return
+
+        token = str(uuid.uuid4())
+
+        # NOTE: The gitlab-rails command may take a while to execute, but the
+        # added benefit is that we don't have to worry about having a
+        # user / password for it.
+        rails_cmd = RAILS_CREATE_TOKEN % {
+            "username": "root",
+            "token_name": event.relation.app.name,
+            "token": token,
+        }
+        self._exec_in_container(["gitlab-rails", "runner", rails_cmd])
+
+        api_scheme = (
+            SCHEME_HTTPS if self.config["tls_secret_name"] else SCHEME_HTTP
+        )
+        # The client will not connect to the GitLab service directly, but
+        # through the external URL, which is either:
+        # - self.app.name, in which case there is a Kubernetes Service for it,
+        #   which will map its port 80 to GitLab's actual port.
+        # - self.config["external_url"], in which case the NGINX Ingress will
+        #   have a route for GitLab, which will point towards the right port.
+        creds = {
+            "host": self._external_url,
+            "port": 80,
+            "api-scheme": api_scheme,
+            "access-token": token,
+        }
+        event.relation.data[self.app]["credentials"] = json.dumps(creds)
+
+    def _on_gitlab_relation_broken(self, event):
+        """Handles the gitlab relation broken event.
+
+        When the relation is broken, it means that the related charm no longer
+        requires the generated token. We should remove it.
+        """
+        if not self.unit.is_leader():
+            return
+
+        relation_data = event.relation.data[self.app]
+        if "credentials" not in relation_data:
+            # We didn't set any relation data, nothing to do.
+            return
+
+        creds = json.loads(relation_data["credentials"])
+        rails_cmd = RAILS_DELETE_TOKEN % {"token": creds["access-token"]}
+        self._exec_in_container(["gitlab-rails", "runner", rails_cmd])
+
+    def _exec_in_container(self, cmd):
+        container = self.unit.get_container("gitlab")
+
+        process = container.exec(cmd)
+        process.wait_output()
 
 
 if __name__ == "__main__":
